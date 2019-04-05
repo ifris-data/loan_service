@@ -1,22 +1,20 @@
 package io.github.ifris.loans.service.impl;
 
-import io.github.ifris.loans.service.LoanAccountService;
 import io.github.ifris.loans.domain.LoanAccount;
 import io.github.ifris.loans.repository.LoanAccountRepository;
 import io.github.ifris.loans.repository.search.LoanAccountSearchRepository;
+import io.github.ifris.loans.service.LoanAccountService;
 import io.github.ifris.loans.service.dto.LoanAccountDTO;
 import io.github.ifris.loans.service.mapper.LoanAccountMapper;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
-import static org.elasticsearch.index.query.QueryBuilders.*;
+import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 
 /**
  * Service Implementation for managing LoanAccount.
@@ -65,8 +63,7 @@ public class LoanAccountServiceImpl implements LoanAccountService {
     @Transactional(readOnly = true)
     public Page<LoanAccountDTO> findAll(Pageable pageable) {
         log.debug("Request to get all LoanAccounts");
-        return loanAccountRepository.findAll(pageable)
-            .map(loanAccountMapper::toDto);
+        return loanAccountRepository.findAll(pageable).map(loanAccountMapper::toDto);
     }
 
 
@@ -80,8 +77,7 @@ public class LoanAccountServiceImpl implements LoanAccountService {
     @Transactional(readOnly = true)
     public Optional<LoanAccountDTO> findOne(Long id) {
         log.debug("Request to get LoanAccount : {}", id);
-        return loanAccountRepository.findById(id)
-            .map(loanAccountMapper::toDto);
+        return loanAccountRepository.findById(id).map(loanAccountMapper::toDto);
     }
 
     /**
@@ -99,7 +95,7 @@ public class LoanAccountServiceImpl implements LoanAccountService {
     /**
      * Search for the loanAccount corresponding to the query.
      *
-     * @param query the query of the search
+     * @param query    the query of the search
      * @param pageable the pagination information
      * @return the list of entities
      */
@@ -107,7 +103,6 @@ public class LoanAccountServiceImpl implements LoanAccountService {
     @Transactional(readOnly = true)
     public Page<LoanAccountDTO> search(String query, Pageable pageable) {
         log.debug("Request to search for a page of LoanAccounts for query {}", query);
-        return loanAccountSearchRepository.search(queryStringQuery(query), pageable)
-            .map(loanAccountMapper::toDto);
+        return loanAccountSearchRepository.search(queryStringQuery(query), pageable).map(loanAccountMapper::toDto);
     }
 }

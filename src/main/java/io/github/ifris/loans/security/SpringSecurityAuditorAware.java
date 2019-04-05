@@ -1,9 +1,7 @@
 package io.github.ifris.loans.security;
 
 import io.github.ifris.loans.config.Constants;
-
 import java.util.Optional;
-
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Component;
 

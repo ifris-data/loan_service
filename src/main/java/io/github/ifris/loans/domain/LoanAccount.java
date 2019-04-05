@@ -1,19 +1,26 @@
 package io.github.ifris.loans.domain;
 
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import javax.persistence.*;
-import javax.validation.constraints.*;
-
-import org.springframework.data.elasticsearch.annotations.Document;
+import io.github.ifris.loans.domain.enumeration.RiskClass;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
-
-import io.github.ifris.loans.domain.enumeration.RiskClass;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.springframework.data.elasticsearch.annotations.Document;
 
 /**
  * A LoanAccount.
@@ -25,7 +32,7 @@ import io.github.ifris.loans.domain.enumeration.RiskClass;
 public class LoanAccount implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -128,17 +135,21 @@ public class LoanAccount implements Serializable {
         return sbu;
     }
 
+    public void setSbu(String sbu) {
+        this.sbu = sbu;
+    }
+
     public LoanAccount sbu(String sbu) {
         this.sbu = sbu;
         return this;
     }
 
-    public void setSbu(String sbu) {
-        this.sbu = sbu;
-    }
-
     public String getRmCode() {
         return rmCode;
+    }
+
+    public void setRmCode(String rmCode) {
+        this.rmCode = rmCode;
     }
 
     public LoanAccount rmCode(String rmCode) {
@@ -146,12 +157,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setRmCode(String rmCode) {
-        this.rmCode = rmCode;
-    }
-
     public String getGlCode() {
         return glCode;
+    }
+
+    public void setGlCode(String glCode) {
+        this.glCode = glCode;
     }
 
     public LoanAccount glCode(String glCode) {
@@ -159,12 +170,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setGlCode(String glCode) {
-        this.glCode = glCode;
-    }
-
     public String getSchemeCode() {
         return schemeCode;
+    }
+
+    public void setSchemeCode(String schemeCode) {
+        this.schemeCode = schemeCode;
     }
 
     public LoanAccount schemeCode(String schemeCode) {
@@ -172,12 +183,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setSchemeCode(String schemeCode) {
-        this.schemeCode = schemeCode;
-    }
-
     public String getCustomerCode() {
         return customerCode;
+    }
+
+    public void setCustomerCode(String customerCode) {
+        this.customerCode = customerCode;
     }
 
     public LoanAccount customerCode(String customerCode) {
@@ -185,12 +196,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setCustomerCode(String customerCode) {
-        this.customerCode = customerCode;
-    }
-
     public String getAccountNumber() {
         return accountNumber;
+    }
+
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
     }
 
     public LoanAccount accountNumber(String accountNumber) {
@@ -198,12 +209,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
-    }
-
     public String getAccountName() {
         return accountName;
+    }
+
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
     }
 
     public LoanAccount accountName(String accountName) {
@@ -211,12 +222,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
-    }
-
     public String getCurrencyCode() {
         return currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
     }
 
     public LoanAccount currencyCode(String currencyCode) {
@@ -224,12 +235,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setCurrencyCode(String currencyCode) {
-        this.currencyCode = currencyCode;
-    }
-
     public LocalDate getOpeningDate() {
         return openingDate;
+    }
+
+    public void setOpeningDate(LocalDate openingDate) {
+        this.openingDate = openingDate;
     }
 
     public LoanAccount openingDate(LocalDate openingDate) {
@@ -237,12 +248,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setOpeningDate(LocalDate openingDate) {
-        this.openingDate = openingDate;
-    }
-
     public BigDecimal getAccountBalance() {
         return accountBalance;
+    }
+
+    public void setAccountBalance(BigDecimal accountBalance) {
+        this.accountBalance = accountBalance;
     }
 
     public LoanAccount accountBalance(BigDecimal accountBalance) {
@@ -250,12 +261,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setAccountBalance(BigDecimal accountBalance) {
-        this.accountBalance = accountBalance;
-    }
-
     public BigDecimal getLimitAmount() {
         return limitAmount;
+    }
+
+    public void setLimitAmount(BigDecimal limitAmount) {
+        this.limitAmount = limitAmount;
     }
 
     public LoanAccount limitAmount(BigDecimal limitAmount) {
@@ -263,12 +274,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setLimitAmount(BigDecimal limitAmount) {
-        this.limitAmount = limitAmount;
-    }
-
     public RiskClass getSystemClassification() {
         return systemClassification;
+    }
+
+    public void setSystemClassification(RiskClass systemClassification) {
+        this.systemClassification = systemClassification;
     }
 
     public LoanAccount systemClassification(RiskClass systemClassification) {
@@ -276,12 +287,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setSystemClassification(RiskClass systemClassification) {
-        this.systemClassification = systemClassification;
-    }
-
     public RiskClass getUserClassification() {
         return userClassification;
+    }
+
+    public void setUserClassification(RiskClass userClassification) {
+        this.userClassification = userClassification;
     }
 
     public LoanAccount userClassification(RiskClass userClassification) {
@@ -289,12 +300,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setUserClassification(RiskClass userClassification) {
-        this.userClassification = userClassification;
-    }
-
     public Double getNominalRate() {
         return nominalRate;
+    }
+
+    public void setNominalRate(Double nominalRate) {
+        this.nominalRate = nominalRate;
     }
 
     public LoanAccount nominalRate(Double nominalRate) {
@@ -302,12 +313,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setNominalRate(Double nominalRate) {
-        this.nominalRate = nominalRate;
-    }
-
     public LocalDate getExpiryDate() {
         return expiryDate;
+    }
+
+    public void setExpiryDate(LocalDate expiryDate) {
+        this.expiryDate = expiryDate;
     }
 
     public LoanAccount expiryDate(LocalDate expiryDate) {
@@ -315,12 +326,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setExpiryDate(LocalDate expiryDate) {
-        this.expiryDate = expiryDate;
-    }
-
     public BigDecimal getInterestSuspended() {
         return interestSuspended;
+    }
+
+    public void setInterestSuspended(BigDecimal interestSuspended) {
+        this.interestSuspended = interestSuspended;
     }
 
     public LoanAccount interestSuspended(BigDecimal interestSuspended) {
@@ -328,12 +339,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setInterestSuspended(BigDecimal interestSuspended) {
-        this.interestSuspended = interestSuspended;
-    }
-
     public BigDecimal getLoanProvision() {
         return loanProvision;
+    }
+
+    public void setLoanProvision(BigDecimal loanProvision) {
+        this.loanProvision = loanProvision;
     }
 
     public LoanAccount loanProvision(BigDecimal loanProvision) {
@@ -341,12 +352,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setLoanProvision(BigDecimal loanProvision) {
-        this.loanProvision = loanProvision;
-    }
-
     public String getEconomicSector() {
         return economicSector;
+    }
+
+    public void setEconomicSector(String economicSector) {
+        this.economicSector = economicSector;
     }
 
     public LoanAccount economicSector(String economicSector) {
@@ -354,12 +365,12 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setEconomicSector(String economicSector) {
-        this.economicSector = economicSector;
-    }
-
     public String getEconomicSubSector() {
         return economicSubSector;
+    }
+
+    public void setEconomicSubSector(String economicSubSector) {
+        this.economicSubSector = economicSubSector;
     }
 
     public LoanAccount economicSubSector(String economicSubSector) {
@@ -367,21 +378,17 @@ public class LoanAccount implements Serializable {
         return this;
     }
 
-    public void setEconomicSubSector(String economicSubSector) {
-        this.economicSubSector = economicSubSector;
-    }
-
     public LocalDate getAppraisalMonth() {
         return appraisalMonth;
+    }
+
+    public void setAppraisalMonth(LocalDate appraisalMonth) {
+        this.appraisalMonth = appraisalMonth;
     }
 
     public LoanAccount appraisalMonth(LocalDate appraisalMonth) {
         this.appraisalMonth = appraisalMonth;
         return this;
-    }
-
-    public void setAppraisalMonth(LocalDate appraisalMonth) {
-        this.appraisalMonth = appraisalMonth;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
@@ -407,28 +414,11 @@ public class LoanAccount implements Serializable {
 
     @Override
     public String toString() {
-        return "LoanAccount{" +
-            "id=" + getId() +
-            ", sbu='" + getSbu() + "'" +
-            ", rmCode='" + getRmCode() + "'" +
-            ", glCode='" + getGlCode() + "'" +
-            ", schemeCode='" + getSchemeCode() + "'" +
-            ", customerCode='" + getCustomerCode() + "'" +
-            ", accountNumber='" + getAccountNumber() + "'" +
-            ", accountName='" + getAccountName() + "'" +
-            ", currencyCode='" + getCurrencyCode() + "'" +
-            ", openingDate='" + getOpeningDate() + "'" +
-            ", accountBalance=" + getAccountBalance() +
-            ", limitAmount=" + getLimitAmount() +
-            ", systemClassification='" + getSystemClassification() + "'" +
-            ", userClassification='" + getUserClassification() + "'" +
-            ", nominalRate=" + getNominalRate() +
-            ", expiryDate='" + getExpiryDate() + "'" +
-            ", interestSuspended=" + getInterestSuspended() +
-            ", loanProvision=" + getLoanProvision() +
-            ", economicSector='" + getEconomicSector() + "'" +
-            ", economicSubSector='" + getEconomicSubSector() + "'" +
-            ", appraisalMonth='" + getAppraisalMonth() + "'" +
-            "}";
+        return "LoanAccount{" + "id=" + getId() + ", sbu='" + getSbu() + "'" + ", rmCode='" + getRmCode() + "'" + ", glCode='" + getGlCode() + "'" + ", schemeCode='" + getSchemeCode() + "'" +
+            ", customerCode='" + getCustomerCode() + "'" + ", accountNumber='" + getAccountNumber() + "'" + ", accountName='" + getAccountName() + "'" + ", currencyCode='" + getCurrencyCode() + "'" +
+            ", openingDate='" + getOpeningDate() + "'" + ", accountBalance=" + getAccountBalance() + ", limitAmount=" + getLimitAmount() + ", systemClassification='" + getSystemClassification() +
+            "'" + ", userClassification='" + getUserClassification() + "'" + ", nominalRate=" + getNominalRate() + ", expiryDate='" + getExpiryDate() + "'" + ", interestSuspended=" +
+            getInterestSuspended() + ", loanProvision=" + getLoanProvision() + ", economicSector='" + getEconomicSector() + "'" + ", economicSubSector='" + getEconomicSubSector() + "'" +
+            ", appraisalMonth='" + getAppraisalMonth() + "'" + "}";
     }
 }

@@ -1,9 +1,8 @@
 package io.github.ifris.loans.web.rest.errors;
 
-import org.zalando.problem.AbstractThrowableProblem;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.zalando.problem.AbstractThrowableProblem;
 
 import static org.zalando.problem.Status.BAD_REQUEST;
 
@@ -14,7 +13,7 @@ import static org.zalando.problem.Status.BAD_REQUEST;
  * <pre>
  * throw new CustomParameterizedException(&quot;myCustomError&quot;, &quot;hello&quot;, &quot;world&quot;);
  * </pre>
- *
+ * <p>
  * Can be translated with:
  *
  * <pre>

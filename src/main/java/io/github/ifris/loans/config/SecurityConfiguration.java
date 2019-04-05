@@ -2,9 +2,8 @@ package io.github.ifris.loans.config;
 
 import io.github.ifris.loans.config.oauth2.OAuth2JwtAccessTokenConverter;
 import io.github.ifris.loans.config.oauth2.OAuth2Properties;
-import io.github.ifris.loans.security.oauth2.OAuth2SignatureVerifierClient;
 import io.github.ifris.loans.security.AuthoritiesConstants;
-
+import io.github.ifris.loans.security.oauth2.OAuth2SignatureVerifierClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.client.loadbalancer.RestTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +16,6 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
@@ -32,21 +30,8 @@ public class SecurityConfiguration extends ResourceServerConfigurerAdapter {
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http
-            .csrf()
-            .disable()
-            .headers()
-            .frameOptions()
-            .disable()
-        .and()
-            .sessionManagement()
-            .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-            .authorizeRequests()
-            .antMatchers("/api/**").authenticated()
-            .antMatchers("/management/health").permitAll()
-            .antMatchers("/management/info").permitAll()
-            .antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN);
+        http.csrf().disable().headers().frameOptions().disable().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests().antMatchers("/api/**")
+            .authenticated().antMatchers("/management/health").permitAll().antMatchers("/management/info").permitAll().antMatchers("/management/**").hasAuthority(AuthoritiesConstants.ADMIN);
     }
 
     @Bean
@@ -60,7 +45,7 @@ public class SecurityConfiguration extends ResourceServerConfigurerAdapter {
     }
 
     @Bean
-	@Qualifier("loadBalancedRestTemplate")
+    @Qualifier("loadBalancedRestTemplate")
     public RestTemplate loadBalancedRestTemplate(RestTemplateCustomizer customizer) {
         RestTemplate restTemplate = new RestTemplate();
         customizer.customize(restTemplate);

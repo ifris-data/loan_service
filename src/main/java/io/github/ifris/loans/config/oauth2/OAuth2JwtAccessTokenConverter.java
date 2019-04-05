@@ -1,14 +1,13 @@
 package io.github.ifris.loans.config.oauth2;
 
 import io.github.ifris.loans.security.oauth2.OAuth2SignatureVerifierClient;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.jwt.crypto.sign.SignatureVerifier;
 import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
-import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-
-import java.util.Map;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 
 /**
  * Improved JwtAccessTokenConverter that can handle lazy fetching of public verifier keys.
@@ -78,6 +77,7 @@ public class OAuth2JwtAccessTokenConverter extends JwtAccessTokenConverter {
         }
         return false;
     }
+
     /**
      * Extract JWT claims and set it to OAuth2Authentication decoded details.
      * Here is how to get details:
@@ -97,6 +97,7 @@ public class OAuth2JwtAccessTokenConverter extends JwtAccessTokenConverter {
      *  }
      * </code>
      *  </pre>
+     *
      * @param claims OAuth2JWTToken claims
      * @return OAuth2Authentication
      */

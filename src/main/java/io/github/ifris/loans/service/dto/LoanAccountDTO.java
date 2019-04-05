@@ -1,11 +1,14 @@
 package io.github.ifris.loans.service.dto;
-import java.time.LocalDate;
-import javax.validation.constraints.*;
+
+import io.github.ifris.loans.domain.enumeration.RiskClass;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Objects;
-import io.github.ifris.loans.domain.enumeration.RiskClass;
-import io.github.ifris.loans.domain.enumeration.RiskClass;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 /**
  * A DTO for the LoanAccount entity.
@@ -269,28 +272,11 @@ public class LoanAccountDTO implements Serializable {
 
     @Override
     public String toString() {
-        return "LoanAccountDTO{" +
-            "id=" + getId() +
-            ", sbu='" + getSbu() + "'" +
-            ", rmCode='" + getRmCode() + "'" +
-            ", glCode='" + getGlCode() + "'" +
-            ", schemeCode='" + getSchemeCode() + "'" +
-            ", customerCode='" + getCustomerCode() + "'" +
-            ", accountNumber='" + getAccountNumber() + "'" +
-            ", accountName='" + getAccountName() + "'" +
-            ", currencyCode='" + getCurrencyCode() + "'" +
-            ", openingDate='" + getOpeningDate() + "'" +
-            ", accountBalance=" + getAccountBalance() +
-            ", limitAmount=" + getLimitAmount() +
-            ", systemClassification='" + getSystemClassification() + "'" +
-            ", userClassification='" + getUserClassification() + "'" +
-            ", nominalRate=" + getNominalRate() +
-            ", expiryDate='" + getExpiryDate() + "'" +
-            ", interestSuspended=" + getInterestSuspended() +
-            ", loanProvision=" + getLoanProvision() +
-            ", economicSector='" + getEconomicSector() + "'" +
-            ", economicSubSector='" + getEconomicSubSector() + "'" +
-            ", appraisalMonth='" + getAppraisalMonth() + "'" +
-            "}";
+        return "LoanAccountDTO{" + "id=" + getId() + ", sbu='" + getSbu() + "'" + ", rmCode='" + getRmCode() + "'" + ", glCode='" + getGlCode() + "'" + ", schemeCode='" + getSchemeCode() + "'" +
+            ", customerCode='" + getCustomerCode() + "'" + ", accountNumber='" + getAccountNumber() + "'" + ", accountName='" + getAccountName() + "'" + ", currencyCode='" + getCurrencyCode() + "'" +
+            ", openingDate='" + getOpeningDate() + "'" + ", accountBalance=" + getAccountBalance() + ", limitAmount=" + getLimitAmount() + ", systemClassification='" + getSystemClassification() +
+            "'" + ", userClassification='" + getUserClassification() + "'" + ", nominalRate=" + getNominalRate() + ", expiryDate='" + getExpiryDate() + "'" + ", interestSuspended=" +
+            getInterestSuspended() + ", loanProvision=" + getLoanProvision() + ", economicSector='" + getEconomicSector() + "'" + ", economicSubSector='" + getEconomicSubSector() + "'" +
+            ", appraisalMonth='" + getAppraisalMonth() + "'" + "}";
     }
 }

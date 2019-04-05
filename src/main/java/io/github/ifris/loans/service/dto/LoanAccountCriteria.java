@@ -1,18 +1,14 @@
 package io.github.ifris.loans.service.dto;
 
-import java.io.Serializable;
-import java.util.Objects;
 import io.github.ifris.loans.domain.enumeration.RiskClass;
-import io.github.ifris.loans.domain.enumeration.RiskClass;
-import io.github.jhipster.service.filter.BooleanFilter;
+import io.github.jhipster.service.filter.BigDecimalFilter;
 import io.github.jhipster.service.filter.DoubleFilter;
 import io.github.jhipster.service.filter.Filter;
-import io.github.jhipster.service.filter.FloatFilter;
-import io.github.jhipster.service.filter.IntegerFilter;
+import io.github.jhipster.service.filter.LocalDateFilter;
 import io.github.jhipster.service.filter.LongFilter;
 import io.github.jhipster.service.filter.StringFilter;
-import io.github.jhipster.service.filter.BigDecimalFilter;
-import io.github.jhipster.service.filter.LocalDateFilter;
+import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Criteria class for the LoanAccount entity. This class is used in LoanAccountResource to
@@ -23,54 +19,27 @@ import io.github.jhipster.service.filter.LocalDateFilter;
  * fix type specific filters.
  */
 public class LoanAccountCriteria implements Serializable {
-    /**
-     * Class for filtering RiskClass
-     */
-    public static class RiskClassFilter extends Filter<RiskClass> {
-    }
-
     private static final long serialVersionUID = 1L;
-
     private LongFilter id;
-
     private StringFilter sbu;
-
     private StringFilter rmCode;
-
     private StringFilter glCode;
-
     private StringFilter schemeCode;
-
     private StringFilter customerCode;
-
     private StringFilter accountNumber;
-
     private StringFilter accountName;
-
     private StringFilter currencyCode;
-
     private LocalDateFilter openingDate;
-
     private BigDecimalFilter accountBalance;
-
     private BigDecimalFilter limitAmount;
-
     private RiskClassFilter systemClassification;
-
     private RiskClassFilter userClassification;
-
     private DoubleFilter nominalRate;
-
     private LocalDateFilter expiryDate;
-
     private BigDecimalFilter interestSuspended;
-
     private BigDecimalFilter loanProvision;
-
     private StringFilter economicSector;
-
     private StringFilter economicSubSector;
-
     private LocalDateFilter appraisalMonth;
 
     public LongFilter getId() {
@@ -241,7 +210,6 @@ public class LoanAccountCriteria implements Serializable {
         this.appraisalMonth = appraisalMonth;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -251,82 +219,40 @@ public class LoanAccountCriteria implements Serializable {
             return false;
         }
         final LoanAccountCriteria that = (LoanAccountCriteria) o;
-        return
-            Objects.equals(id, that.id) &&
-            Objects.equals(sbu, that.sbu) &&
-            Objects.equals(rmCode, that.rmCode) &&
-            Objects.equals(glCode, that.glCode) &&
-            Objects.equals(schemeCode, that.schemeCode) &&
-            Objects.equals(customerCode, that.customerCode) &&
-            Objects.equals(accountNumber, that.accountNumber) &&
-            Objects.equals(accountName, that.accountName) &&
-            Objects.equals(currencyCode, that.currencyCode) &&
-            Objects.equals(openingDate, that.openingDate) &&
-            Objects.equals(accountBalance, that.accountBalance) &&
-            Objects.equals(limitAmount, that.limitAmount) &&
-            Objects.equals(systemClassification, that.systemClassification) &&
-            Objects.equals(userClassification, that.userClassification) &&
-            Objects.equals(nominalRate, that.nominalRate) &&
-            Objects.equals(expiryDate, that.expiryDate) &&
-            Objects.equals(interestSuspended, that.interestSuspended) &&
-            Objects.equals(loanProvision, that.loanProvision) &&
-            Objects.equals(economicSector, that.economicSector) &&
-            Objects.equals(economicSubSector, that.economicSubSector) &&
-            Objects.equals(appraisalMonth, that.appraisalMonth);
+        return Objects.equals(id, that.id) && Objects.equals(sbu, that.sbu) && Objects.equals(rmCode, that.rmCode) && Objects.equals(glCode, that.glCode) &&
+            Objects.equals(schemeCode, that.schemeCode) && Objects.equals(customerCode, that.customerCode) && Objects.equals(accountNumber, that.accountNumber) &&
+            Objects.equals(accountName, that.accountName) && Objects.equals(currencyCode, that.currencyCode) && Objects.equals(openingDate, that.openingDate) &&
+            Objects.equals(accountBalance, that.accountBalance) && Objects.equals(limitAmount, that.limitAmount) && Objects.equals(systemClassification, that.systemClassification) &&
+            Objects.equals(userClassification, that.userClassification) && Objects.equals(nominalRate, that.nominalRate) && Objects.equals(expiryDate, that.expiryDate) &&
+            Objects.equals(interestSuspended, that.interestSuspended) && Objects.equals(loanProvision, that.loanProvision) && Objects.equals(economicSector, that.economicSector) &&
+            Objects.equals(economicSubSector, that.economicSubSector) && Objects.equals(appraisalMonth, that.appraisalMonth);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-        id,
-        sbu,
-        rmCode,
-        glCode,
-        schemeCode,
-        customerCode,
-        accountNumber,
-        accountName,
-        currencyCode,
-        openingDate,
-        accountBalance,
-        limitAmount,
-        systemClassification,
-        userClassification,
-        nominalRate,
-        expiryDate,
-        interestSuspended,
-        loanProvision,
-        economicSector,
-        economicSubSector,
-        appraisalMonth
-        );
+        return Objects
+            .hash(id, sbu, rmCode, glCode, schemeCode, customerCode, accountNumber, accountName, currencyCode, openingDate, accountBalance, limitAmount, systemClassification, userClassification,
+                nominalRate, expiryDate, interestSuspended, loanProvision, economicSector, economicSubSector, appraisalMonth);
     }
 
     @Override
     public String toString() {
-        return "LoanAccountCriteria{" +
-                (id != null ? "id=" + id + ", " : "") +
-                (sbu != null ? "sbu=" + sbu + ", " : "") +
-                (rmCode != null ? "rmCode=" + rmCode + ", " : "") +
-                (glCode != null ? "glCode=" + glCode + ", " : "") +
-                (schemeCode != null ? "schemeCode=" + schemeCode + ", " : "") +
-                (customerCode != null ? "customerCode=" + customerCode + ", " : "") +
-                (accountNumber != null ? "accountNumber=" + accountNumber + ", " : "") +
-                (accountName != null ? "accountName=" + accountName + ", " : "") +
-                (currencyCode != null ? "currencyCode=" + currencyCode + ", " : "") +
-                (openingDate != null ? "openingDate=" + openingDate + ", " : "") +
-                (accountBalance != null ? "accountBalance=" + accountBalance + ", " : "") +
-                (limitAmount != null ? "limitAmount=" + limitAmount + ", " : "") +
-                (systemClassification != null ? "systemClassification=" + systemClassification + ", " : "") +
-                (userClassification != null ? "userClassification=" + userClassification + ", " : "") +
-                (nominalRate != null ? "nominalRate=" + nominalRate + ", " : "") +
-                (expiryDate != null ? "expiryDate=" + expiryDate + ", " : "") +
-                (interestSuspended != null ? "interestSuspended=" + interestSuspended + ", " : "") +
-                (loanProvision != null ? "loanProvision=" + loanProvision + ", " : "") +
-                (economicSector != null ? "economicSector=" + economicSector + ", " : "") +
-                (economicSubSector != null ? "economicSubSector=" + economicSubSector + ", " : "") +
-                (appraisalMonth != null ? "appraisalMonth=" + appraisalMonth + ", " : "") +
-            "}";
+        return "LoanAccountCriteria{" + (id != null ? "id=" + id + ", " : "") + (sbu != null ? "sbu=" + sbu + ", " : "") + (rmCode != null ? "rmCode=" + rmCode + ", " : "") +
+            (glCode != null ? "glCode=" + glCode + ", " : "") + (schemeCode != null ? "schemeCode=" + schemeCode + ", " : "") + (customerCode != null ? "customerCode=" + customerCode + ", " : "") +
+            (accountNumber != null ? "accountNumber=" + accountNumber + ", " : "") + (accountName != null ? "accountName=" + accountName + ", " : "") +
+            (currencyCode != null ? "currencyCode=" + currencyCode + ", " : "") + (openingDate != null ? "openingDate=" + openingDate + ", " : "") +
+            (accountBalance != null ? "accountBalance=" + accountBalance + ", " : "") + (limitAmount != null ? "limitAmount=" + limitAmount + ", " : "") +
+            (systemClassification != null ? "systemClassification=" + systemClassification + ", " : "") + (userClassification != null ? "userClassification=" + userClassification + ", " : "") +
+            (nominalRate != null ? "nominalRate=" + nominalRate + ", " : "") + (expiryDate != null ? "expiryDate=" + expiryDate + ", " : "") +
+            (interestSuspended != null ? "interestSuspended=" + interestSuspended + ", " : "") + (loanProvision != null ? "loanProvision=" + loanProvision + ", " : "") +
+            (economicSector != null ? "economicSector=" + economicSector + ", " : "") + (economicSubSector != null ? "economicSubSector=" + economicSubSector + ", " : "") +
+            (appraisalMonth != null ? "appraisalMonth=" + appraisalMonth + ", " : "") + "}";
+    }
+
+    /**
+     * Class for filtering RiskClass
+     */
+    public static class RiskClassFilter extends Filter<RiskClass> {
     }
 
 }

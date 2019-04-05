@@ -1,11 +1,10 @@
 package io.github.ifris.loans.web.rest.util;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
 /**
  * Utility class for handling pagination.
