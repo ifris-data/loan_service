@@ -170,8 +170,8 @@ jhipster:
         description: Loan API documentation
         version: 0.0.1-SNAPSHOT
         terms-of-service-url:
-        contact-name:Edwin Njeru
-        contact-url: https://github.com/ifris-data/loan_service
+        contact-name: Edwin Njeru
+        contact-url: 'https://github.com/ifris-data/loan_service'
         contact-email: mailnjeru@gmail.com
         license: MIT
         license-url:
