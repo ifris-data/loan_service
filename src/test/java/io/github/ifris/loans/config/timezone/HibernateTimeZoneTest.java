@@ -4,6 +4,16 @@ import io.github.ifris.loans.LoanserviceApp;
 import io.github.ifris.loans.config.SecurityBeanOverrideConfiguration;
 import io.github.ifris.loans.repository.timezone.DateTimeWrapper;
 import io.github.ifris.loans.repository.timezone.DateTimeWrapperRepository;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.Month;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,9 +23,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.*;
-import java.time.format.DateTimeFormatter;
 
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,16 +55,11 @@ public class HibernateTimeZoneTest {
         dateTimeWrapper.setOffsetTime(OffsetTime.parse("14:30:00+02:00"));
         dateTimeWrapper.setLocalDate(LocalDate.parse("2016-09-10"));
 
-        dateTimeFormatter = DateTimeFormatter
-            .ofPattern("yyyy-MM-dd HH:mm:ss.S")
-            .withZone(ZoneId.of("UTC"));
+        dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S").withZone(ZoneId.of("UTC"));
 
-        timeFormatter = DateTimeFormatter
-            .ofPattern("HH:mm:ss")
-            .withZone(ZoneId.of("UTC"));
+        timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.of("UTC"));
 
-        dateFormatter = DateTimeFormatter
-            .ofPattern("yyyy-MM-dd");
+        dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     }
 
     @Test
@@ -79,10 +81,7 @@ public class HibernateTimeZoneTest {
 
         String request = generateSqlRequest("local_date_time", dateTimeWrapper.getId());
         SqlRowSet resultSet = jdbcTemplate.queryForRowSet(request);
-        String expectedValue = dateTimeWrapper
-            .getLocalDateTime()
-            .atZone(ZoneId.systemDefault())
-            .format(dateTimeFormatter);
+        String expectedValue = dateTimeWrapper.getLocalDateTime().atZone(ZoneId.systemDefault()).format(dateTimeFormatter);
 
         assertThatDateStoredValueIsEqualToInsertDateValueOnGMTTimeZone(resultSet, expectedValue);
     }
@@ -94,9 +93,7 @@ public class HibernateTimeZoneTest {
 
         String request = generateSqlRequest("offset_date_time", dateTimeWrapper.getId());
         SqlRowSet resultSet = jdbcTemplate.queryForRowSet(request);
-        String expectedValue = dateTimeWrapper
-            .getOffsetDateTime()
-            .format(dateTimeFormatter);
+        String expectedValue = dateTimeWrapper.getOffsetDateTime().format(dateTimeFormatter);
 
         assertThatDateStoredValueIsEqualToInsertDateValueOnGMTTimeZone(resultSet, expectedValue);
     }
@@ -108,9 +105,7 @@ public class HibernateTimeZoneTest {
 
         String request = generateSqlRequest("zoned_date_time", dateTimeWrapper.getId());
         SqlRowSet resultSet = jdbcTemplate.queryForRowSet(request);
-        String expectedValue = dateTimeWrapper
-            .getZonedDateTime()
-            .format(dateTimeFormatter);
+        String expectedValue = dateTimeWrapper.getZonedDateTime().format(dateTimeFormatter);
 
         assertThatDateStoredValueIsEqualToInsertDateValueOnGMTTimeZone(resultSet, expectedValue);
     }
@@ -122,11 +117,7 @@ public class HibernateTimeZoneTest {
 
         String request = generateSqlRequest("local_time", dateTimeWrapper.getId());
         SqlRowSet resultSet = jdbcTemplate.queryForRowSet(request);
-        String expectedValue = dateTimeWrapper
-            .getLocalTime()
-            .atDate(LocalDate.of(1970, Month.JANUARY, 1))
-            .atZone(ZoneId.systemDefault())
-            .format(timeFormatter);
+        String expectedValue = dateTimeWrapper.getLocalTime().atDate(LocalDate.of(1970, Month.JANUARY, 1)).atZone(ZoneId.systemDefault()).format(timeFormatter);
 
         assertThatDateStoredValueIsEqualToInsertDateValueOnGMTTimeZone(resultSet, expectedValue);
     }
@@ -138,12 +129,7 @@ public class HibernateTimeZoneTest {
 
         String request = generateSqlRequest("offset_time", dateTimeWrapper.getId());
         SqlRowSet resultSet = jdbcTemplate.queryForRowSet(request);
-        String expectedValue = dateTimeWrapper
-            .getOffsetTime()
-            .toLocalTime()
-            .atDate(LocalDate.of(1970, Month.JANUARY, 1))
-            .atZone(ZoneId.systemDefault())
-            .format(timeFormatter);
+        String expectedValue = dateTimeWrapper.getOffsetTime().toLocalTime().atDate(LocalDate.of(1970, Month.JANUARY, 1)).atZone(ZoneId.systemDefault()).format(timeFormatter);
 
         assertThatDateStoredValueIsEqualToInsertDateValueOnGMTTimeZone(resultSet, expectedValue);
     }
@@ -155,9 +141,7 @@ public class HibernateTimeZoneTest {
 
         String request = generateSqlRequest("local_date", dateTimeWrapper.getId());
         SqlRowSet resultSet = jdbcTemplate.queryForRowSet(request);
-        String expectedValue = dateTimeWrapper
-            .getLocalDate()
-            .format(dateFormatter);
+        String expectedValue = dateTimeWrapper.getLocalDate().format(dateFormatter);
 
         assertThatDateStoredValueIsEqualToInsertDateValueOnGMTTimeZone(resultSet, expectedValue);
     }

@@ -1,19 +1,22 @@
 package io.github.ifris.loans.web.rest;
 
 import io.github.ifris.loans.LoanserviceApp;
-
 import io.github.ifris.loans.config.SecurityBeanOverrideConfiguration;
-
 import io.github.ifris.loans.domain.LoanAccount;
+import io.github.ifris.loans.domain.enumeration.RiskClass;
 import io.github.ifris.loans.repository.LoanAccountRepository;
 import io.github.ifris.loans.repository.search.LoanAccountSearchRepository;
+import io.github.ifris.loans.service.LoanAccountQueryService;
 import io.github.ifris.loans.service.LoanAccountService;
 import io.github.ifris.loans.service.dto.LoanAccountDTO;
 import io.github.ifris.loans.service.mapper.LoanAccountMapper;
 import io.github.ifris.loans.web.rest.errors.ExceptionTranslator;
-import io.github.ifris.loans.service.dto.LoanAccountCriteria;
-import io.github.ifris.loans.service.LoanAccountQueryService;
-
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Collections;
+import java.util.List;
+import javax.persistence.EntityManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,24 +34,21 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.Validator;
 
-import javax.persistence.EntityManager;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Collections;
-import java.util.List;
-
-
 import static io.github.ifris.loans.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.elasticsearch.index.query.QueryBuilders.queryStringQuery;
 import static org.hamcrest.Matchers.hasItem;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.github.ifris.loans.domain.enumeration.RiskClass;
-import io.github.ifris.loans.domain.enumeration.RiskClass;
 /**
  * Test class for the LoanAccountResource REST controller.
  *
@@ -58,29 +58,29 @@ import io.github.ifris.loans.domain.enumeration.RiskClass;
 @SpringBootTest(classes = {SecurityBeanOverrideConfiguration.class, LoanserviceApp.class})
 public class LoanAccountResourceIntTest {
 
-    private static final String DEFAULT_SBU = "AAAAAAAAAA";
-    private static final String UPDATED_SBU = "BBBBBBBBBB";
+    private static final String DEFAULT_SBU = "COR";
+    private static final String UPDATED_SBU = "BUS";
 
-    private static final String DEFAULT_RM_CODE = "AAAAAAAAAA";
-    private static final String UPDATED_RM_CODE = "BBBBBBBBBB";
+    private static final String DEFAULT_RM_CODE = "CAN203";
+    private static final String UPDATED_RM_CODE = "SB1500";
 
-    private static final String DEFAULT_GL_CODE = "AAAAAAAAAA";
-    private static final String UPDATED_GL_CODE = "BBBBBBBBBB";
+    private static final String DEFAULT_GL_CODE = "10042";
+    private static final String UPDATED_GL_CODE = "10041";
 
-    private static final String DEFAULT_SCHEME_CODE = "AAAAAAAAAA";
-    private static final String UPDATED_SCHEME_CODE = "BBBBBBBBBB";
+    private static final String DEFAULT_SCHEME_CODE = "CA201";
+    private static final String UPDATED_SCHEME_CODE = "LA440";
 
-    private static final String DEFAULT_CUSTOMER_CODE = "AAAAAAAAAA";
-    private static final String UPDATED_CUSTOMER_CODE = "BBBBBBBBBB";
+    private static final String DEFAULT_CUSTOMER_CODE = "00020100";
+    private static final String UPDATED_CUSTOMER_CODE = "00020101";
 
-    private static final String DEFAULT_ACCOUNT_NUMBER = "AAAAAAAAAA";
-    private static final String UPDATED_ACCOUNT_NUMBER = "BBBBBBBBBB";
+    private static final String DEFAULT_ACCOUNT_NUMBER = "081190001000103";
+    private static final String UPDATED_ACCOUNT_NUMBER = "040002190001004";
 
-    private static final String DEFAULT_ACCOUNT_NAME = "AAAAAAAAAA";
-    private static final String UPDATED_ACCOUNT_NAME = "BBBBBBBBBB";
+    private static final String DEFAULT_ACCOUNT_NAME = "Edwin Financials";
+    private static final String UPDATED_ACCOUNT_NAME = "Edwin Exporters";
 
-    private static final String DEFAULT_CURRENCY_CODE = "AAAAAAAAAA";
-    private static final String UPDATED_CURRENCY_CODE = "BBBBBBBBBB";
+    private static final String DEFAULT_CURRENCY_CODE = "KES";
+    private static final String UPDATED_CURRENCY_CODE = "USD";
 
     private static final LocalDate DEFAULT_OPENING_DATE = LocalDate.ofEpochDay(0L);
     private static final LocalDate UPDATED_OPENING_DATE = LocalDate.now(ZoneId.systemDefault());
@@ -94,8 +94,8 @@ public class LoanAccountResourceIntTest {
     private static final RiskClass DEFAULT_SYSTEM_CLASSIFICATION = RiskClass.NORMAL;
     private static final RiskClass UPDATED_SYSTEM_CLASSIFICATION = RiskClass.WATCH;
 
-    private static final RiskClass DEFAULT_USER_CLASSIFICATION = RiskClass.;
-    private static final RiskClass UPDATED_USER_CLASSIFICATION = RiskClass.;
+    private static final RiskClass DEFAULT_USER_CLASSIFICATION = RiskClass.NORMAL;
+    private static final RiskClass UPDATED_USER_CLASSIFICATION = RiskClass.WATCH;
 
     private static final Double DEFAULT_NOMINAL_RATE = 1D;
     private static final Double UPDATED_NOMINAL_RATE = 2D;
@@ -109,11 +109,11 @@ public class LoanAccountResourceIntTest {
     private static final BigDecimal DEFAULT_LOAN_PROVISION = new BigDecimal(0);
     private static final BigDecimal UPDATED_LOAN_PROVISION = new BigDecimal(1);
 
-    private static final String DEFAULT_ECONOMIC_SECTOR = "AAAAAAAAAA";
-    private static final String UPDATED_ECONOMIC_SECTOR = "BBBBBBBBBB";
+    private static final String DEFAULT_ECONOMIC_SECTOR = "Finance Sector";
+    private static final String UPDATED_ECONOMIC_SECTOR = "Agriculture";
 
-    private static final String DEFAULT_ECONOMIC_SUB_SECTOR = "AAAAAAAAAA";
-    private static final String UPDATED_ECONOMIC_SUB_SECTOR = "BBBBBBBBBB";
+    private static final String DEFAULT_ECONOMIC_SUB_SECTOR = "Microfinance";
+    private static final String UPDATED_ECONOMIC_SUB_SECTOR = "Coffee Farming";
 
     private static final LocalDate DEFAULT_APPRAISAL_MONTH = LocalDate.ofEpochDay(0L);
     private static final LocalDate UPDATED_APPRAISAL_MONTH = LocalDate.now(ZoneId.systemDefault());
@@ -157,47 +157,28 @@ public class LoanAccountResourceIntTest {
 
     private LoanAccount loanAccount;
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-        final LoanAccountResource loanAccountResource = new LoanAccountResource(loanAccountService, loanAccountQueryService);
-        this.restLoanAccountMockMvc = MockMvcBuilders.standaloneSetup(loanAccountResource)
-            .setCustomArgumentResolvers(pageableArgumentResolver)
-            .setControllerAdvice(exceptionTranslator)
-            .setConversionService(createFormattingConversionService())
-            .setMessageConverters(jacksonMessageConverter)
-            .setValidator(validator).build();
-    }
-
     /**
      * Create an entity for this test.
-     *
+     * <p>
      * This is a static method, as tests for other entities might also need it,
      * if they test an entity which requires the current entity.
      */
     public static LoanAccount createEntity(EntityManager em) {
-        LoanAccount loanAccount = new LoanAccount()
-            .sbu(DEFAULT_SBU)
-            .rmCode(DEFAULT_RM_CODE)
-            .glCode(DEFAULT_GL_CODE)
-            .schemeCode(DEFAULT_SCHEME_CODE)
-            .customerCode(DEFAULT_CUSTOMER_CODE)
-            .accountNumber(DEFAULT_ACCOUNT_NUMBER)
-            .accountName(DEFAULT_ACCOUNT_NAME)
-            .currencyCode(DEFAULT_CURRENCY_CODE)
-            .openingDate(DEFAULT_OPENING_DATE)
-            .accountBalance(DEFAULT_ACCOUNT_BALANCE)
-            .limitAmount(DEFAULT_LIMIT_AMOUNT)
-            .systemClassification(DEFAULT_SYSTEM_CLASSIFICATION)
-            .userClassification(DEFAULT_USER_CLASSIFICATION)
-            .nominalRate(DEFAULT_NOMINAL_RATE)
-            .expiryDate(DEFAULT_EXPIRY_DATE)
-            .interestSuspended(DEFAULT_INTEREST_SUSPENDED)
-            .loanProvision(DEFAULT_LOAN_PROVISION)
-            .economicSector(DEFAULT_ECONOMIC_SECTOR)
-            .economicSubSector(DEFAULT_ECONOMIC_SUB_SECTOR)
-            .appraisalMonth(DEFAULT_APPRAISAL_MONTH);
+        LoanAccount loanAccount =
+            new LoanAccount().sbu(DEFAULT_SBU).rmCode(DEFAULT_RM_CODE).glCode(DEFAULT_GL_CODE).schemeCode(DEFAULT_SCHEME_CODE).customerCode(DEFAULT_CUSTOMER_CODE).accountNumber(DEFAULT_ACCOUNT_NUMBER)
+                .accountName(DEFAULT_ACCOUNT_NAME).currencyCode(DEFAULT_CURRENCY_CODE).openingDate(DEFAULT_OPENING_DATE).accountBalance(DEFAULT_ACCOUNT_BALANCE).limitAmount(DEFAULT_LIMIT_AMOUNT)
+                .systemClassification(DEFAULT_SYSTEM_CLASSIFICATION).userClassification(DEFAULT_USER_CLASSIFICATION).nominalRate(DEFAULT_NOMINAL_RATE).expiryDate(DEFAULT_EXPIRY_DATE)
+                .interestSuspended(DEFAULT_INTEREST_SUSPENDED).loanProvision(DEFAULT_LOAN_PROVISION).economicSector(DEFAULT_ECONOMIC_SECTOR).economicSubSector(DEFAULT_ECONOMIC_SUB_SECTOR)
+                .appraisalMonth(DEFAULT_APPRAISAL_MONTH);
         return loanAccount;
+    }
+
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+        final LoanAccountResource loanAccountResource = new LoanAccountResource(loanAccountService, loanAccountQueryService);
+        this.restLoanAccountMockMvc = MockMvcBuilders.standaloneSetup(loanAccountResource).setCustomArgumentResolvers(pageableArgumentResolver).setControllerAdvice(exceptionTranslator)
+            .setConversionService(createFormattingConversionService()).setMessageConverters(jacksonMessageConverter).setValidator(validator).build();
     }
 
     @Before
@@ -212,9 +193,7 @@ public class LoanAccountResourceIntTest {
 
         // Create the LoanAccount
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isCreated());
 
         // Validate the LoanAccount in the database
@@ -256,9 +235,7 @@ public class LoanAccountResourceIntTest {
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
         // An entity with an existing ID cannot be created, so this API call must fail
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the LoanAccount in the database
@@ -279,9 +256,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -298,9 +273,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -317,9 +290,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -336,9 +307,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -355,9 +324,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -374,9 +341,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -393,9 +358,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -412,9 +375,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -431,9 +392,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -450,9 +409,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -469,9 +426,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -488,9 +443,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -507,9 +460,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -526,9 +477,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -545,9 +494,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -564,9 +511,7 @@ public class LoanAccountResourceIntTest {
         // Create the LoanAccount, which fails.
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
-        restLoanAccountMockMvc.perform(post("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(post("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -580,32 +525,22 @@ public class LoanAccountResourceIntTest {
         loanAccountRepository.saveAndFlush(loanAccount);
 
         // Get all the loanAccountList
-        restLoanAccountMockMvc.perform(get("/api/loan-accounts?sort=id,desc"))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(loanAccount.getId().intValue())))
-            .andExpect(jsonPath("$.[*].sbu").value(hasItem(DEFAULT_SBU.toString())))
-            .andExpect(jsonPath("$.[*].rmCode").value(hasItem(DEFAULT_RM_CODE.toString())))
-            .andExpect(jsonPath("$.[*].glCode").value(hasItem(DEFAULT_GL_CODE.toString())))
-            .andExpect(jsonPath("$.[*].schemeCode").value(hasItem(DEFAULT_SCHEME_CODE.toString())))
-            .andExpect(jsonPath("$.[*].customerCode").value(hasItem(DEFAULT_CUSTOMER_CODE.toString())))
-            .andExpect(jsonPath("$.[*].accountNumber").value(hasItem(DEFAULT_ACCOUNT_NUMBER.toString())))
-            .andExpect(jsonPath("$.[*].accountName").value(hasItem(DEFAULT_ACCOUNT_NAME.toString())))
-            .andExpect(jsonPath("$.[*].currencyCode").value(hasItem(DEFAULT_CURRENCY_CODE.toString())))
-            .andExpect(jsonPath("$.[*].openingDate").value(hasItem(DEFAULT_OPENING_DATE.toString())))
-            .andExpect(jsonPath("$.[*].accountBalance").value(hasItem(DEFAULT_ACCOUNT_BALANCE.intValue())))
-            .andExpect(jsonPath("$.[*].limitAmount").value(hasItem(DEFAULT_LIMIT_AMOUNT.intValue())))
+        restLoanAccountMockMvc.perform(get("/api/loan-accounts?sort=id,desc")).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(loanAccount.getId().intValue()))).andExpect(jsonPath("$.[*].sbu").value(hasItem(DEFAULT_SBU.toString())))
+            .andExpect(jsonPath("$.[*].rmCode").value(hasItem(DEFAULT_RM_CODE.toString()))).andExpect(jsonPath("$.[*].glCode").value(hasItem(DEFAULT_GL_CODE.toString())))
+            .andExpect(jsonPath("$.[*].schemeCode").value(hasItem(DEFAULT_SCHEME_CODE.toString()))).andExpect(jsonPath("$.[*].customerCode").value(hasItem(DEFAULT_CUSTOMER_CODE.toString())))
+            .andExpect(jsonPath("$.[*].accountNumber").value(hasItem(DEFAULT_ACCOUNT_NUMBER.toString()))).andExpect(jsonPath("$.[*].accountName").value(hasItem(DEFAULT_ACCOUNT_NAME.toString())))
+            .andExpect(jsonPath("$.[*].currencyCode").value(hasItem(DEFAULT_CURRENCY_CODE.toString()))).andExpect(jsonPath("$.[*].openingDate").value(hasItem(DEFAULT_OPENING_DATE.toString())))
+            .andExpect(jsonPath("$.[*].accountBalance").value(hasItem(DEFAULT_ACCOUNT_BALANCE.intValue()))).andExpect(jsonPath("$.[*].limitAmount").value(hasItem(DEFAULT_LIMIT_AMOUNT.intValue())))
             .andExpect(jsonPath("$.[*].systemClassification").value(hasItem(DEFAULT_SYSTEM_CLASSIFICATION.toString())))
             .andExpect(jsonPath("$.[*].userClassification").value(hasItem(DEFAULT_USER_CLASSIFICATION.toString())))
-            .andExpect(jsonPath("$.[*].nominalRate").value(hasItem(DEFAULT_NOMINAL_RATE.doubleValue())))
-            .andExpect(jsonPath("$.[*].expiryDate").value(hasItem(DEFAULT_EXPIRY_DATE.toString())))
+            .andExpect(jsonPath("$.[*].nominalRate").value(hasItem(DEFAULT_NOMINAL_RATE.doubleValue()))).andExpect(jsonPath("$.[*].expiryDate").value(hasItem(DEFAULT_EXPIRY_DATE.toString())))
             .andExpect(jsonPath("$.[*].interestSuspended").value(hasItem(DEFAULT_INTEREST_SUSPENDED.intValue())))
-            .andExpect(jsonPath("$.[*].loanProvision").value(hasItem(DEFAULT_LOAN_PROVISION.intValue())))
-            .andExpect(jsonPath("$.[*].economicSector").value(hasItem(DEFAULT_ECONOMIC_SECTOR.toString())))
+            .andExpect(jsonPath("$.[*].loanProvision").value(hasItem(DEFAULT_LOAN_PROVISION.intValue()))).andExpect(jsonPath("$.[*].economicSector").value(hasItem(DEFAULT_ECONOMIC_SECTOR.toString())))
             .andExpect(jsonPath("$.[*].economicSubSector").value(hasItem(DEFAULT_ECONOMIC_SUB_SECTOR.toString())))
             .andExpect(jsonPath("$.[*].appraisalMonth").value(hasItem(DEFAULT_APPRAISAL_MONTH.toString())));
     }
-    
+
     @Test
     @Transactional
     public void getLoanAccount() throws Exception {
@@ -613,29 +548,17 @@ public class LoanAccountResourceIntTest {
         loanAccountRepository.saveAndFlush(loanAccount);
 
         // Get the loanAccount
-        restLoanAccountMockMvc.perform(get("/api/loan-accounts/{id}", loanAccount.getId()))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.id").value(loanAccount.getId().intValue()))
-            .andExpect(jsonPath("$.sbu").value(DEFAULT_SBU.toString()))
-            .andExpect(jsonPath("$.rmCode").value(DEFAULT_RM_CODE.toString()))
-            .andExpect(jsonPath("$.glCode").value(DEFAULT_GL_CODE.toString()))
-            .andExpect(jsonPath("$.schemeCode").value(DEFAULT_SCHEME_CODE.toString()))
-            .andExpect(jsonPath("$.customerCode").value(DEFAULT_CUSTOMER_CODE.toString()))
-            .andExpect(jsonPath("$.accountNumber").value(DEFAULT_ACCOUNT_NUMBER.toString()))
-            .andExpect(jsonPath("$.accountName").value(DEFAULT_ACCOUNT_NAME.toString()))
-            .andExpect(jsonPath("$.currencyCode").value(DEFAULT_CURRENCY_CODE.toString()))
-            .andExpect(jsonPath("$.openingDate").value(DEFAULT_OPENING_DATE.toString()))
-            .andExpect(jsonPath("$.accountBalance").value(DEFAULT_ACCOUNT_BALANCE.intValue()))
-            .andExpect(jsonPath("$.limitAmount").value(DEFAULT_LIMIT_AMOUNT.intValue()))
-            .andExpect(jsonPath("$.systemClassification").value(DEFAULT_SYSTEM_CLASSIFICATION.toString()))
-            .andExpect(jsonPath("$.userClassification").value(DEFAULT_USER_CLASSIFICATION.toString()))
-            .andExpect(jsonPath("$.nominalRate").value(DEFAULT_NOMINAL_RATE.doubleValue()))
-            .andExpect(jsonPath("$.expiryDate").value(DEFAULT_EXPIRY_DATE.toString()))
-            .andExpect(jsonPath("$.interestSuspended").value(DEFAULT_INTEREST_SUSPENDED.intValue()))
-            .andExpect(jsonPath("$.loanProvision").value(DEFAULT_LOAN_PROVISION.intValue()))
-            .andExpect(jsonPath("$.economicSector").value(DEFAULT_ECONOMIC_SECTOR.toString()))
-            .andExpect(jsonPath("$.economicSubSector").value(DEFAULT_ECONOMIC_SUB_SECTOR.toString()))
+        restLoanAccountMockMvc.perform(get("/api/loan-accounts/{id}", loanAccount.getId())).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.id").value(loanAccount.getId().intValue())).andExpect(jsonPath("$.sbu").value(DEFAULT_SBU.toString()))
+            .andExpect(jsonPath("$.rmCode").value(DEFAULT_RM_CODE.toString())).andExpect(jsonPath("$.glCode").value(DEFAULT_GL_CODE.toString()))
+            .andExpect(jsonPath("$.schemeCode").value(DEFAULT_SCHEME_CODE.toString())).andExpect(jsonPath("$.customerCode").value(DEFAULT_CUSTOMER_CODE.toString()))
+            .andExpect(jsonPath("$.accountNumber").value(DEFAULT_ACCOUNT_NUMBER.toString())).andExpect(jsonPath("$.accountName").value(DEFAULT_ACCOUNT_NAME.toString()))
+            .andExpect(jsonPath("$.currencyCode").value(DEFAULT_CURRENCY_CODE.toString())).andExpect(jsonPath("$.openingDate").value(DEFAULT_OPENING_DATE.toString()))
+            .andExpect(jsonPath("$.accountBalance").value(DEFAULT_ACCOUNT_BALANCE.intValue())).andExpect(jsonPath("$.limitAmount").value(DEFAULT_LIMIT_AMOUNT.intValue()))
+            .andExpect(jsonPath("$.systemClassification").value(DEFAULT_SYSTEM_CLASSIFICATION.toString())).andExpect(jsonPath("$.userClassification").value(DEFAULT_USER_CLASSIFICATION.toString()))
+            .andExpect(jsonPath("$.nominalRate").value(DEFAULT_NOMINAL_RATE.doubleValue())).andExpect(jsonPath("$.expiryDate").value(DEFAULT_EXPIRY_DATE.toString()))
+            .andExpect(jsonPath("$.interestSuspended").value(DEFAULT_INTEREST_SUSPENDED.intValue())).andExpect(jsonPath("$.loanProvision").value(DEFAULT_LOAN_PROVISION.intValue()))
+            .andExpect(jsonPath("$.economicSector").value(DEFAULT_ECONOMIC_SECTOR.toString())).andExpect(jsonPath("$.economicSubSector").value(DEFAULT_ECONOMIC_SUB_SECTOR.toString()))
             .andExpect(jsonPath("$.appraisalMonth").value(DEFAULT_APPRAISAL_MONTH.toString()));
     }
 
@@ -1503,35 +1426,22 @@ public class LoanAccountResourceIntTest {
      * Executes the search, and checks that the default entity is returned
      */
     private void defaultLoanAccountShouldBeFound(String filter) throws Exception {
-        restLoanAccountMockMvc.perform(get("/api/loan-accounts?sort=id,desc&" + filter))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(loanAccount.getId().intValue())))
-            .andExpect(jsonPath("$.[*].sbu").value(hasItem(DEFAULT_SBU)))
-            .andExpect(jsonPath("$.[*].rmCode").value(hasItem(DEFAULT_RM_CODE)))
-            .andExpect(jsonPath("$.[*].glCode").value(hasItem(DEFAULT_GL_CODE)))
-            .andExpect(jsonPath("$.[*].schemeCode").value(hasItem(DEFAULT_SCHEME_CODE)))
-            .andExpect(jsonPath("$.[*].customerCode").value(hasItem(DEFAULT_CUSTOMER_CODE)))
-            .andExpect(jsonPath("$.[*].accountNumber").value(hasItem(DEFAULT_ACCOUNT_NUMBER)))
-            .andExpect(jsonPath("$.[*].accountName").value(hasItem(DEFAULT_ACCOUNT_NAME)))
-            .andExpect(jsonPath("$.[*].currencyCode").value(hasItem(DEFAULT_CURRENCY_CODE)))
-            .andExpect(jsonPath("$.[*].openingDate").value(hasItem(DEFAULT_OPENING_DATE.toString())))
-            .andExpect(jsonPath("$.[*].accountBalance").value(hasItem(DEFAULT_ACCOUNT_BALANCE.intValue())))
-            .andExpect(jsonPath("$.[*].limitAmount").value(hasItem(DEFAULT_LIMIT_AMOUNT.intValue())))
+        restLoanAccountMockMvc.perform(get("/api/loan-accounts?sort=id,desc&" + filter)).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$.[*].id").value(hasItem(loanAccount.getId().intValue()))).andExpect(jsonPath("$.[*].sbu").value(hasItem(DEFAULT_SBU)))
+            .andExpect(jsonPath("$.[*].rmCode").value(hasItem(DEFAULT_RM_CODE))).andExpect(jsonPath("$.[*].glCode").value(hasItem(DEFAULT_GL_CODE)))
+            .andExpect(jsonPath("$.[*].schemeCode").value(hasItem(DEFAULT_SCHEME_CODE))).andExpect(jsonPath("$.[*].customerCode").value(hasItem(DEFAULT_CUSTOMER_CODE)))
+            .andExpect(jsonPath("$.[*].accountNumber").value(hasItem(DEFAULT_ACCOUNT_NUMBER))).andExpect(jsonPath("$.[*].accountName").value(hasItem(DEFAULT_ACCOUNT_NAME)))
+            .andExpect(jsonPath("$.[*].currencyCode").value(hasItem(DEFAULT_CURRENCY_CODE))).andExpect(jsonPath("$.[*].openingDate").value(hasItem(DEFAULT_OPENING_DATE.toString())))
+            .andExpect(jsonPath("$.[*].accountBalance").value(hasItem(DEFAULT_ACCOUNT_BALANCE.intValue()))).andExpect(jsonPath("$.[*].limitAmount").value(hasItem(DEFAULT_LIMIT_AMOUNT.intValue())))
             .andExpect(jsonPath("$.[*].systemClassification").value(hasItem(DEFAULT_SYSTEM_CLASSIFICATION.toString())))
             .andExpect(jsonPath("$.[*].userClassification").value(hasItem(DEFAULT_USER_CLASSIFICATION.toString())))
-            .andExpect(jsonPath("$.[*].nominalRate").value(hasItem(DEFAULT_NOMINAL_RATE.doubleValue())))
-            .andExpect(jsonPath("$.[*].expiryDate").value(hasItem(DEFAULT_EXPIRY_DATE.toString())))
+            .andExpect(jsonPath("$.[*].nominalRate").value(hasItem(DEFAULT_NOMINAL_RATE.doubleValue()))).andExpect(jsonPath("$.[*].expiryDate").value(hasItem(DEFAULT_EXPIRY_DATE.toString())))
             .andExpect(jsonPath("$.[*].interestSuspended").value(hasItem(DEFAULT_INTEREST_SUSPENDED.intValue())))
-            .andExpect(jsonPath("$.[*].loanProvision").value(hasItem(DEFAULT_LOAN_PROVISION.intValue())))
-            .andExpect(jsonPath("$.[*].economicSector").value(hasItem(DEFAULT_ECONOMIC_SECTOR)))
-            .andExpect(jsonPath("$.[*].economicSubSector").value(hasItem(DEFAULT_ECONOMIC_SUB_SECTOR)))
-            .andExpect(jsonPath("$.[*].appraisalMonth").value(hasItem(DEFAULT_APPRAISAL_MONTH.toString())));
+            .andExpect(jsonPath("$.[*].loanProvision").value(hasItem(DEFAULT_LOAN_PROVISION.intValue()))).andExpect(jsonPath("$.[*].economicSector").value(hasItem(DEFAULT_ECONOMIC_SECTOR)))
+            .andExpect(jsonPath("$.[*].economicSubSector").value(hasItem(DEFAULT_ECONOMIC_SUB_SECTOR))).andExpect(jsonPath("$.[*].appraisalMonth").value(hasItem(DEFAULT_APPRAISAL_MONTH.toString())));
 
         // Check, that the count call also returns 1
-        restLoanAccountMockMvc.perform(get("/api/loan-accounts/count?sort=id,desc&" + filter))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        restLoanAccountMockMvc.perform(get("/api/loan-accounts/count?sort=id,desc&" + filter)).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(content().string("1"));
     }
 
@@ -1539,16 +1449,11 @@ public class LoanAccountResourceIntTest {
      * Executes the search, and checks that the default entity is not returned
      */
     private void defaultLoanAccountShouldNotBeFound(String filter) throws Exception {
-        restLoanAccountMockMvc.perform(get("/api/loan-accounts?sort=id,desc&" + filter))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$").isArray())
-            .andExpect(jsonPath("$").isEmpty());
+        restLoanAccountMockMvc.perform(get("/api/loan-accounts?sort=id,desc&" + filter)).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+            .andExpect(jsonPath("$").isArray()).andExpect(jsonPath("$").isEmpty());
 
         // Check, that the count call also returns 0
-        restLoanAccountMockMvc.perform(get("/api/loan-accounts/count?sort=id,desc&" + filter))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+        restLoanAccountMockMvc.perform(get("/api/loan-accounts/count?sort=id,desc&" + filter)).andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(content().string("0"));
     }
 
@@ -1557,8 +1462,7 @@ public class LoanAccountResourceIntTest {
     @Transactional
     public void getNonExistingLoanAccount() throws Exception {
         // Get the loanAccount
-        restLoanAccountMockMvc.perform(get("/api/loan-accounts/{id}", Long.MAX_VALUE))
-            .andExpect(status().isNotFound());
+        restLoanAccountMockMvc.perform(get("/api/loan-accounts/{id}", Long.MAX_VALUE)).andExpect(status().isNotFound());
     }
 
     @Test
@@ -1573,33 +1477,14 @@ public class LoanAccountResourceIntTest {
         LoanAccount updatedLoanAccount = loanAccountRepository.findById(loanAccount.getId()).get();
         // Disconnect from session so that the updates on updatedLoanAccount are not directly saved in db
         em.detach(updatedLoanAccount);
-        updatedLoanAccount
-            .sbu(UPDATED_SBU)
-            .rmCode(UPDATED_RM_CODE)
-            .glCode(UPDATED_GL_CODE)
-            .schemeCode(UPDATED_SCHEME_CODE)
-            .customerCode(UPDATED_CUSTOMER_CODE)
-            .accountNumber(UPDATED_ACCOUNT_NUMBER)
-            .accountName(UPDATED_ACCOUNT_NAME)
-            .currencyCode(UPDATED_CURRENCY_CODE)
-            .openingDate(UPDATED_OPENING_DATE)
-            .accountBalance(UPDATED_ACCOUNT_BALANCE)
-            .limitAmount(UPDATED_LIMIT_AMOUNT)
-            .systemClassification(UPDATED_SYSTEM_CLASSIFICATION)
-            .userClassification(UPDATED_USER_CLASSIFICATION)
-            .nominalRate(UPDATED_NOMINAL_RATE)
-            .expiryDate(UPDATED_EXPIRY_DATE)
-            .interestSuspended(UPDATED_INTEREST_SUSPENDED)
-            .loanProvision(UPDATED_LOAN_PROVISION)
-            .economicSector(UPDATED_ECONOMIC_SECTOR)
-            .economicSubSector(UPDATED_ECONOMIC_SUB_SECTOR)
+        updatedLoanAccount.sbu(UPDATED_SBU).rmCode(UPDATED_RM_CODE).glCode(UPDATED_GL_CODE).schemeCode(UPDATED_SCHEME_CODE).customerCode(UPDATED_CUSTOMER_CODE).accountNumber(UPDATED_ACCOUNT_NUMBER)
+            .accountName(UPDATED_ACCOUNT_NAME).currencyCode(UPDATED_CURRENCY_CODE).openingDate(UPDATED_OPENING_DATE).accountBalance(UPDATED_ACCOUNT_BALANCE).limitAmount(UPDATED_LIMIT_AMOUNT)
+            .systemClassification(UPDATED_SYSTEM_CLASSIFICATION).userClassification(UPDATED_USER_CLASSIFICATION).nominalRate(UPDATED_NOMINAL_RATE).expiryDate(UPDATED_EXPIRY_DATE)
+            .interestSuspended(UPDATED_INTEREST_SUSPENDED).loanProvision(UPDATED_LOAN_PROVISION).economicSector(UPDATED_ECONOMIC_SECTOR).economicSubSector(UPDATED_ECONOMIC_SUB_SECTOR)
             .appraisalMonth(UPDATED_APPRAISAL_MONTH);
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(updatedLoanAccount);
 
-        restLoanAccountMockMvc.perform(put("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
-            .andExpect(status().isOk());
+        restLoanAccountMockMvc.perform(put("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO))).andExpect(status().isOk());
 
         // Validate the LoanAccount in the database
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -1639,9 +1524,7 @@ public class LoanAccountResourceIntTest {
         LoanAccountDTO loanAccountDTO = loanAccountMapper.toDto(loanAccount);
 
         // If the entity doesn't have an ID, it will throw BadRequestAlertException
-        restLoanAccountMockMvc.perform(put("/api/loan-accounts")
-            .contentType(TestUtil.APPLICATION_JSON_UTF8)
-            .content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
+        restLoanAccountMockMvc.perform(put("/api/loan-accounts").contentType(TestUtil.APPLICATION_JSON_UTF8).content(TestUtil.convertObjectToJsonBytes(loanAccountDTO)))
             .andExpect(status().isBadRequest());
 
         // Validate the LoanAccount in the database
@@ -1661,9 +1544,7 @@ public class LoanAccountResourceIntTest {
         int databaseSizeBeforeDelete = loanAccountRepository.findAll().size();
 
         // Delete the loanAccount
-        restLoanAccountMockMvc.perform(delete("/api/loan-accounts/{id}", loanAccount.getId())
-            .accept(TestUtil.APPLICATION_JSON_UTF8))
-            .andExpect(status().isOk());
+        restLoanAccountMockMvc.perform(delete("/api/loan-accounts/{id}", loanAccount.getId()).accept(TestUtil.APPLICATION_JSON_UTF8)).andExpect(status().isOk());
 
         // Validate the database is empty
         List<LoanAccount> loanAccountList = loanAccountRepository.findAll();
@@ -1681,30 +1562,20 @@ public class LoanAccountResourceIntTest {
         when(mockLoanAccountSearchRepository.search(queryStringQuery("id:" + loanAccount.getId()), PageRequest.of(0, 20)))
             .thenReturn(new PageImpl<>(Collections.singletonList(loanAccount), PageRequest.of(0, 1), 1));
         // Search the loanAccount
-        restLoanAccountMockMvc.perform(get("/api/_search/loan-accounts?query=id:" + loanAccount.getId()))
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
-            .andExpect(jsonPath("$.[*].id").value(hasItem(loanAccount.getId().intValue())))
-            .andExpect(jsonPath("$.[*].sbu").value(hasItem(DEFAULT_SBU)))
-            .andExpect(jsonPath("$.[*].rmCode").value(hasItem(DEFAULT_RM_CODE)))
-            .andExpect(jsonPath("$.[*].glCode").value(hasItem(DEFAULT_GL_CODE)))
-            .andExpect(jsonPath("$.[*].schemeCode").value(hasItem(DEFAULT_SCHEME_CODE)))
-            .andExpect(jsonPath("$.[*].customerCode").value(hasItem(DEFAULT_CUSTOMER_CODE)))
-            .andExpect(jsonPath("$.[*].accountNumber").value(hasItem(DEFAULT_ACCOUNT_NUMBER)))
-            .andExpect(jsonPath("$.[*].accountName").value(hasItem(DEFAULT_ACCOUNT_NAME)))
-            .andExpect(jsonPath("$.[*].currencyCode").value(hasItem(DEFAULT_CURRENCY_CODE)))
-            .andExpect(jsonPath("$.[*].openingDate").value(hasItem(DEFAULT_OPENING_DATE.toString())))
-            .andExpect(jsonPath("$.[*].accountBalance").value(hasItem(DEFAULT_ACCOUNT_BALANCE.intValue())))
+        restLoanAccountMockMvc.perform(get("/api/_search/loan-accounts?query=id:" + loanAccount.getId())).andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE)).andExpect(jsonPath("$.[*].id").value(hasItem(loanAccount.getId().intValue())))
+            .andExpect(jsonPath("$.[*].sbu").value(hasItem(DEFAULT_SBU))).andExpect(jsonPath("$.[*].rmCode").value(hasItem(DEFAULT_RM_CODE)))
+            .andExpect(jsonPath("$.[*].glCode").value(hasItem(DEFAULT_GL_CODE))).andExpect(jsonPath("$.[*].schemeCode").value(hasItem(DEFAULT_SCHEME_CODE)))
+            .andExpect(jsonPath("$.[*].customerCode").value(hasItem(DEFAULT_CUSTOMER_CODE))).andExpect(jsonPath("$.[*].accountNumber").value(hasItem(DEFAULT_ACCOUNT_NUMBER)))
+            .andExpect(jsonPath("$.[*].accountName").value(hasItem(DEFAULT_ACCOUNT_NAME))).andExpect(jsonPath("$.[*].currencyCode").value(hasItem(DEFAULT_CURRENCY_CODE)))
+            .andExpect(jsonPath("$.[*].openingDate").value(hasItem(DEFAULT_OPENING_DATE.toString()))).andExpect(jsonPath("$.[*].accountBalance").value(hasItem(DEFAULT_ACCOUNT_BALANCE.intValue())))
             .andExpect(jsonPath("$.[*].limitAmount").value(hasItem(DEFAULT_LIMIT_AMOUNT.intValue())))
             .andExpect(jsonPath("$.[*].systemClassification").value(hasItem(DEFAULT_SYSTEM_CLASSIFICATION.toString())))
             .andExpect(jsonPath("$.[*].userClassification").value(hasItem(DEFAULT_USER_CLASSIFICATION.toString())))
-            .andExpect(jsonPath("$.[*].nominalRate").value(hasItem(DEFAULT_NOMINAL_RATE.doubleValue())))
-            .andExpect(jsonPath("$.[*].expiryDate").value(hasItem(DEFAULT_EXPIRY_DATE.toString())))
+            .andExpect(jsonPath("$.[*].nominalRate").value(hasItem(DEFAULT_NOMINAL_RATE.doubleValue()))).andExpect(jsonPath("$.[*].expiryDate").value(hasItem(DEFAULT_EXPIRY_DATE.toString())))
             .andExpect(jsonPath("$.[*].interestSuspended").value(hasItem(DEFAULT_INTEREST_SUSPENDED.intValue())))
-            .andExpect(jsonPath("$.[*].loanProvision").value(hasItem(DEFAULT_LOAN_PROVISION.intValue())))
-            .andExpect(jsonPath("$.[*].economicSector").value(hasItem(DEFAULT_ECONOMIC_SECTOR)))
-            .andExpect(jsonPath("$.[*].economicSubSector").value(hasItem(DEFAULT_ECONOMIC_SUB_SECTOR)))
-            .andExpect(jsonPath("$.[*].appraisalMonth").value(hasItem(DEFAULT_APPRAISAL_MONTH.toString())));
+            .andExpect(jsonPath("$.[*].loanProvision").value(hasItem(DEFAULT_LOAN_PROVISION.intValue()))).andExpect(jsonPath("$.[*].economicSector").value(hasItem(DEFAULT_ECONOMIC_SECTOR)))
+            .andExpect(jsonPath("$.[*].economicSubSector").value(hasItem(DEFAULT_ECONOMIC_SUB_SECTOR))).andExpect(jsonPath("$.[*].appraisalMonth").value(hasItem(DEFAULT_APPRAISAL_MONTH.toString())));
     }
 
     @Test
