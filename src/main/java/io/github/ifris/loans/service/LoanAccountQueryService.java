@@ -1,7 +1,6 @@
 package io.github.ifris.loans.service;
 
 import io.github.ifris.loans.domain.LoanAccount;
-import io.github.ifris.loans.domain.LoanAccount_;
 import io.github.ifris.loans.repository.LoanAccountRepository;
 import io.github.ifris.loans.repository.search.LoanAccountSearchRepository;
 import io.github.ifris.loans.service.dto.LoanAccountCriteria;

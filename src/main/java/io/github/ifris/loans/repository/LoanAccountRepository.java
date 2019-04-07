@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
  * Spring Data  repository for the LoanAccount entity.
  */
 @SuppressWarnings("unused")
-@Repository
+@Repository("loanAccountRepository")
 public interface LoanAccountRepository extends JpaRepository<LoanAccount, Long>, JpaSpecificationExecutor<LoanAccount> {
 
 }
