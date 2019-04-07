@@ -1,6 +1,7 @@
 package io.github.ifris.loans.service;
 
 import io.github.ifris.loans.domain.LoanAccount;
+import io.github.ifris.loans.domain.LoanAccount_;
 import io.github.ifris.loans.repository.LoanAccountRepository;
 import io.github.ifris.loans.repository.search.LoanAccountSearchRepository;
 import io.github.ifris.loans.service.dto.LoanAccountCriteria;
@@ -10,6 +11,7 @@ import io.github.jhipster.service.QueryService;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -34,7 +36,7 @@ public class LoanAccountQueryService extends QueryService<LoanAccount> {
 
     private final LoanAccountSearchRepository loanAccountSearchRepository;
 
-    public LoanAccountQueryService(LoanAccountRepository loanAccountRepository, LoanAccountMapper loanAccountMapper, LoanAccountSearchRepository loanAccountSearchRepository) {
+    public LoanAccountQueryService(@Qualifier("loanAccountRepository") LoanAccountRepository loanAccountRepository, LoanAccountMapper loanAccountMapper, LoanAccountSearchRepository loanAccountSearchRepository) {
         this.loanAccountRepository = loanAccountRepository;
         this.loanAccountMapper = loanAccountMapper;
         this.loanAccountSearchRepository = loanAccountSearchRepository;
