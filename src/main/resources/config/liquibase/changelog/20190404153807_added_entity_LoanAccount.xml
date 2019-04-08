@@ -66,14 +66,6 @@
                 <constraints nullable="false" />
             </column>
 
-            <column name="system_classification" type="varchar(255)">
-                <constraints nullable="false" />
-            </column>
-
-            <column name="user_classification" type="varchar(255)">
-                <constraints nullable="false" />
-            </column>
-
             <column name="nominal_rate" type="double">
                 <constraints nullable="true" />
             </column>
@@ -99,6 +91,14 @@
             </column>
 
             <column name="appraisal_month" type="date">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="system_classification" type="varchar(255)">
+                <constraints nullable="false" />
+            </column>
+
+            <column name="user_classification" type="varchar(255)">
                 <constraints nullable="false" />
             </column>
 

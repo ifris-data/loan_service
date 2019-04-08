@@ -91,22 +91,6 @@
             "fieldValidateRulesMin": 0
         },
         {
-            "fieldName": "systemClassification",
-            "fieldType": "RiskClass",
-            "fieldValues": "NORMAL,WATCH,SUBSTANDARD,DOUBTFUL,LOSS",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
-            "fieldName": "userClassification",
-            "fieldType": "RiskClass",
-            "fieldValues": "",
-            "fieldValidateRules": [
-                "required"
-            ]
-        },
-        {
             "fieldName": "nominalRate",
             "fieldType": "Double"
         },
@@ -148,6 +132,20 @@
         {
             "fieldName": "appraisalMonth",
             "fieldType": "LocalDate",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "systemClassification",
+            "fieldType": "String",
+            "fieldValidateRules": [
+                "required"
+            ]
+        },
+        {
+            "fieldName": "userClassification",
+            "fieldType": "String",
             "fieldValidateRules": [
                 "required"
             ]

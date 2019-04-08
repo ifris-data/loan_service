@@ -1,22 +1,26 @@
 package io.github.ifris.loans.service;
 
-import io.github.ifris.loans.domain.LoanAccount;
-import io.github.ifris.loans.domain.LoanAccount_;
-import io.github.ifris.loans.repository.LoanAccountRepository;
-import io.github.ifris.loans.repository.search.LoanAccountSearchRepository;
-import io.github.ifris.loans.service.dto.LoanAccountCriteria;
-import io.github.ifris.loans.service.dto.LoanAccountDTO;
-import io.github.ifris.loans.service.mapper.LoanAccountMapper;
-import io.github.jhipster.service.QueryService;
 import java.util.List;
+
+import javax.persistence.criteria.JoinType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import io.github.jhipster.service.QueryService;
+
+import io.github.ifris.loans.domain.LoanAccount;
+import io.github.ifris.loans.domain.*; // for static metamodels
+import io.github.ifris.loans.repository.LoanAccountRepository;
+import io.github.ifris.loans.repository.search.LoanAccountSearchRepository;
+import io.github.ifris.loans.service.dto.LoanAccountCriteria;
+import io.github.ifris.loans.service.dto.LoanAccountDTO;
+import io.github.ifris.loans.service.mapper.LoanAccountMapper;
 
 /**
  * Service for executing complex queries for LoanAccount entities in the database.
@@ -36,7 +40,7 @@ public class LoanAccountQueryService extends QueryService<LoanAccount> {
 
     private final LoanAccountSearchRepository loanAccountSearchRepository;
 
-    public LoanAccountQueryService(@Qualifier("loanAccountRepository") LoanAccountRepository loanAccountRepository, LoanAccountMapper loanAccountMapper, LoanAccountSearchRepository loanAccountSearchRepository) {
+    public LoanAccountQueryService(LoanAccountRepository loanAccountRepository, LoanAccountMapper loanAccountMapper, LoanAccountSearchRepository loanAccountSearchRepository) {
         this.loanAccountRepository = loanAccountRepository;
         this.loanAccountMapper = loanAccountMapper;
         this.loanAccountSearchRepository = loanAccountSearchRepository;
@@ -44,7 +48,6 @@ public class LoanAccountQueryService extends QueryService<LoanAccount> {
 
     /**
      * Return a {@link List} of {@link LoanAccountDTO} which matches the criteria from the database
-     *
      * @param criteria The object which holds all the filters, which the entities should match.
      * @return the matching entities.
      */
@@ -57,21 +60,20 @@ public class LoanAccountQueryService extends QueryService<LoanAccount> {
 
     /**
      * Return a {@link Page} of {@link LoanAccountDTO} which matches the criteria from the database
-     *
      * @param criteria The object which holds all the filters, which the entities should match.
-     * @param page     The page, which should be returned.
+     * @param page The page, which should be returned.
      * @return the matching entities.
      */
     @Transactional(readOnly = true)
     public Page<LoanAccountDTO> findByCriteria(LoanAccountCriteria criteria, Pageable page) {
         log.debug("find by criteria : {}, page: {}", criteria, page);
         final Specification<LoanAccount> specification = createSpecification(criteria);
-        return loanAccountRepository.findAll(specification, page).map(loanAccountMapper::toDto);
+        return loanAccountRepository.findAll(specification, page)
+            .map(loanAccountMapper::toDto);
     }
 
     /**
      * Return the number of matching entities in the database
-     *
      * @param criteria The object which holds all the filters, which the entities should match.
      * @return the number of matching entities.
      */
@@ -124,12 +126,6 @@ public class LoanAccountQueryService extends QueryService<LoanAccount> {
             if (criteria.getLimitAmount() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getLimitAmount(), LoanAccount_.limitAmount));
             }
-            if (criteria.getSystemClassification() != null) {
-                specification = specification.and(buildSpecification(criteria.getSystemClassification(), LoanAccount_.systemClassification));
-            }
-            if (criteria.getUserClassification() != null) {
-                specification = specification.and(buildSpecification(criteria.getUserClassification(), LoanAccount_.userClassification));
-            }
             if (criteria.getNominalRate() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getNominalRate(), LoanAccount_.nominalRate));
             }
@@ -150,6 +146,12 @@ public class LoanAccountQueryService extends QueryService<LoanAccount> {
             }
             if (criteria.getAppraisalMonth() != null) {
                 specification = specification.and(buildRangeSpecification(criteria.getAppraisalMonth(), LoanAccount_.appraisalMonth));
+            }
+            if (criteria.getSystemClassification() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getSystemClassification(), LoanAccount_.systemClassification));
+            }
+            if (criteria.getUserClassification() != null) {
+                specification = specification.and(buildStringSpecification(criteria.getUserClassification(), LoanAccount_.userClassification));
             }
         }
         return specification;

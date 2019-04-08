@@ -95,8 +95,6 @@ class LoanAccountGatlingTest extends Simulation {
                 , "openingDate":"2020-01-01T00:00:00.000Z"
                 , "accountBalance":"0"
                 , "limitAmount":"0"
-                , "systemClassification":"NORMAL"
-                , "userClassification":""
                 , "nominalRate":null
                 , "expiryDate":"2020-01-01T00:00:00.000Z"
                 , "interestSuspended":"0"
@@ -104,6 +102,8 @@ class LoanAccountGatlingTest extends Simulation {
                 , "economicSector":"SAMPLE_TEXT"
                 , "economicSubSector":"SAMPLE_TEXT"
                 , "appraisalMonth":"2020-01-01T00:00:00.000Z"
+                , "systemClassification":"SAMPLE_TEXT"
+                , "userClassification":"SAMPLE_TEXT"
                 }""")).asJSON
             .check(status.is(201))
             .check(headerRegex("Location", "(.*)").saveAs("new_loanAccount_url"))).exitHereIfFailed

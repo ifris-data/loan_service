@@ -1,14 +1,9 @@
 package io.github.ifris.loans.service.dto;
-
-import io.github.ifris.loans.domain.enumeration.RiskClass;
+import java.time.LocalDate;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.Objects;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 /**
  * A DTO for the LoanAccount entity.
@@ -55,12 +50,6 @@ public class LoanAccountDTO implements Serializable {
     @DecimalMin(value = "0")
     private BigDecimal limitAmount;
 
-    @NotNull
-    private RiskClass systemClassification;
-
-    @NotNull
-    private RiskClass userClassification;
-
     private Double nominalRate;
 
     private LocalDate expiryDate;
@@ -79,6 +68,12 @@ public class LoanAccountDTO implements Serializable {
 
     @NotNull
     private LocalDate appraisalMonth;
+
+    @NotNull
+    private String systemClassification;
+
+    @NotNull
+    private String userClassification;
 
 
     public Long getId() {
@@ -177,22 +172,6 @@ public class LoanAccountDTO implements Serializable {
         this.limitAmount = limitAmount;
     }
 
-    public RiskClass getSystemClassification() {
-        return systemClassification;
-    }
-
-    public void setSystemClassification(RiskClass systemClassification) {
-        this.systemClassification = systemClassification;
-    }
-
-    public RiskClass getUserClassification() {
-        return userClassification;
-    }
-
-    public void setUserClassification(RiskClass userClassification) {
-        this.userClassification = userClassification;
-    }
-
     public Double getNominalRate() {
         return nominalRate;
     }
@@ -249,6 +228,22 @@ public class LoanAccountDTO implements Serializable {
         this.appraisalMonth = appraisalMonth;
     }
 
+    public String getSystemClassification() {
+        return systemClassification;
+    }
+
+    public void setSystemClassification(String systemClassification) {
+        this.systemClassification = systemClassification;
+    }
+
+    public String getUserClassification() {
+        return userClassification;
+    }
+
+    public void setUserClassification(String userClassification) {
+        this.userClassification = userClassification;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -272,11 +267,28 @@ public class LoanAccountDTO implements Serializable {
 
     @Override
     public String toString() {
-        return "LoanAccountDTO{" + "id=" + getId() + ", sbu='" + getSbu() + "'" + ", rmCode='" + getRmCode() + "'" + ", glCode='" + getGlCode() + "'" + ", schemeCode='" + getSchemeCode() + "'" +
-            ", customerCode='" + getCustomerCode() + "'" + ", accountNumber='" + getAccountNumber() + "'" + ", accountName='" + getAccountName() + "'" + ", currencyCode='" + getCurrencyCode() + "'" +
-            ", openingDate='" + getOpeningDate() + "'" + ", accountBalance=" + getAccountBalance() + ", limitAmount=" + getLimitAmount() + ", systemClassification='" + getSystemClassification() +
-            "'" + ", userClassification='" + getUserClassification() + "'" + ", nominalRate=" + getNominalRate() + ", expiryDate='" + getExpiryDate() + "'" + ", interestSuspended=" +
-            getInterestSuspended() + ", loanProvision=" + getLoanProvision() + ", economicSector='" + getEconomicSector() + "'" + ", economicSubSector='" + getEconomicSubSector() + "'" +
-            ", appraisalMonth='" + getAppraisalMonth() + "'" + "}";
+        return "LoanAccountDTO{" +
+            "id=" + getId() +
+            ", sbu='" + getSbu() + "'" +
+            ", rmCode='" + getRmCode() + "'" +
+            ", glCode='" + getGlCode() + "'" +
+            ", schemeCode='" + getSchemeCode() + "'" +
+            ", customerCode='" + getCustomerCode() + "'" +
+            ", accountNumber='" + getAccountNumber() + "'" +
+            ", accountName='" + getAccountName() + "'" +
+            ", currencyCode='" + getCurrencyCode() + "'" +
+            ", openingDate='" + getOpeningDate() + "'" +
+            ", accountBalance=" + getAccountBalance() +
+            ", limitAmount=" + getLimitAmount() +
+            ", nominalRate=" + getNominalRate() +
+            ", expiryDate='" + getExpiryDate() + "'" +
+            ", interestSuspended=" + getInterestSuspended() +
+            ", loanProvision=" + getLoanProvision() +
+            ", economicSector='" + getEconomicSector() + "'" +
+            ", economicSubSector='" + getEconomicSubSector() + "'" +
+            ", appraisalMonth='" + getAppraisalMonth() + "'" +
+            ", systemClassification='" + getSystemClassification() + "'" +
+            ", userClassification='" + getUserClassification() + "'" +
+            "}";
     }
 }

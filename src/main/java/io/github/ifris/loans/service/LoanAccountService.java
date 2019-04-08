@@ -1,9 +1,11 @@
 package io.github.ifris.loans.service;
 
 import io.github.ifris.loans.service.dto.LoanAccountDTO;
-import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.Optional;
 
 /**
  * Service Interface for managing LoanAccount.
@@ -45,7 +47,8 @@ public interface LoanAccountService {
     /**
      * Search for the loanAccount corresponding to the query.
      *
-     * @param query    the query of the search
+     * @param query the query of the search
+     * 
      * @param pageable the pagination information
      * @return the list of entities
      */
